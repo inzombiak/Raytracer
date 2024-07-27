@@ -93,7 +93,7 @@ inline double dot(const vec3& u, const vec3& v) {
 
 inline vec3 cross(const vec3& u, const vec3& v) {
     return vec3(u[1] * v[2] - u[2] * v[1],
-                u[0] * v[2] - u[2] * v[0],
+                u[2] * v[0] - u[0] * v[2],
                 u[0] * v[1] - u[1] * v[0]);
 }
 
@@ -105,6 +105,15 @@ inline vec3 random_in_unit_sphere() {
     while(true) {
         vec3 p = vec3::random(-1, 1);
         if (p.length_squared() < 1)
+            return p;
+    }
+}
+
+inline vec3 random_in_unit_disk() {
+    while(true) {
+        vec3 p = vec3::random(-1, 1);
+        p[2] = 0;
+        if (p.length_squared()<1)
             return p;
     }
 }

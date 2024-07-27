@@ -22,7 +22,7 @@ class hittable_list : public hittable {
             objects.push_back(obj);
         }
 
-        bool hit(const ray& r, const interval& ray_t, hit_record& rec) const override {
+        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
             hit_record record;
             bool hit_anything = false;
             double closest_so_far = ray_t.max;
