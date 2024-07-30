@@ -1,10 +1,14 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#define MT_RENDER 1
+
 #include "rtweekend.h"
 
 #include "hittable.h"
 #include "material.h"
+
+#include "thread_pool.h"
 
 class camera {
   public:
@@ -23,7 +27,23 @@ class camera {
         initialize();
 
         cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+#if MT_RENDER
+        ray_world = &world;
 
+        threadPool.start();
+        mt_tex = vector<vector<color>>(image_height, vector<color>(image_width, color(0, 0, 0)));
+        for (int j = 0; j < image_height; j++) {
+            threadPool.queue_job([this](int i){ this->mt_render_row(i);},j);
+        }
+        threadPool.waitForCompletion();
+        for (int i = 0; i < image_height; ++i) {
+            for (int j = 0; j < image_width; ++j) {
+                clog << mt_tex[i][j] << endl;
+                write_color(std::cout, mt_tex[i][j]);
+            }
+        }
+        threadPool.stop();
+#else
         for (int j = 0; j < image_height; j++) {
             clog<<"\rScanline remaining: " << (image_height - j) << ' ' << flush;
             for (int i = 0; i < image_width; i++) {
@@ -36,6 +56,7 @@ class camera {
                 write_color(std::cout, pixel_color);
             }
         }
+#endif
         clog<<"\rDonezo!                    \n";
     }
 
@@ -49,7 +70,21 @@ class camera {
     vec3   u, v, w;     
     vec3   defocus_disk_u;       // Defocus disk horizontal radius
     vec3   defocus_disk_v;       // Defocus disk vertical radius
+    const hittable* ray_world;
+    vector<vector<color>> mt_tex;
+    ThreadPool threadPool;
 
+    void mt_render_row(int i) {
+        for (int j = 0; j < image_width; j++) {
+            color pixel_color(0, 0, 0);
+            for (int samp = 0; samp < samples_per_pixel; ++samp) {
+                ray r = get_ray(j, i);
+                pixel_color += ray_color(r, max_depth, *ray_world);
+            }
+            pixel_color *= pixel_sample_scale;
+            mt_tex[i][j] = pixel_color;
+        }
+    }
     
     void initialize() {
         image_height = int(image_width / aspect_ratio);
