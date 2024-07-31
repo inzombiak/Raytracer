@@ -63,7 +63,9 @@ class ThreadPool {
                 job();
                 if ( --njobs_pending == 0 ) {
                     main_condition.notify_one();
-}
+                } else {
+                    clog << njobs_pending << " jobs left\n";
+                }
             }
         }
 

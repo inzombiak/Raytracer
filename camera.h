@@ -1,14 +1,15 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#define MT_RENDER 1
-
 #include "rtweekend.h"
 
 #include "hittable.h"
 #include "material.h"
 
 #include "thread_pool.h"
+
+#include <chrono>
+using namespace std::chrono;
 
 class camera {
   public:
@@ -27,18 +28,19 @@ class camera {
         initialize();
 
         cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        auto start = high_resolution_clock::now();
 #if MT_RENDER
         ray_world = &world;
 
         threadPool.start();
-        mt_tex = vector<vector<color>>(image_height, vector<color>(image_width, color(0, 0, 0)));
+        mt_tex = vector<vector<color>>(image_height);
         for (int j = 0; j < image_height; j++) {
             threadPool.queue_job([this](int i){ this->mt_render_row(i);},j);
         }
         threadPool.waitForCompletion();
+        clog << "Done with MT! \n" << flush; 
         for (int i = 0; i < image_height; ++i) {
             for (int j = 0; j < image_width; ++j) {
-                clog << mt_tex[i][j] << endl;
                 write_color(std::cout, mt_tex[i][j]);
             }
         }
@@ -57,7 +59,9 @@ class camera {
             }
         }
 #endif
-        clog<<"\rDonezo!                    \n";
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<seconds>(end - start);
+        clog<<"\rDonezo! " << duration.count() << " seconds elapsed \n";
     }
 
   private:
@@ -75,6 +79,7 @@ class camera {
     ThreadPool threadPool;
 
     void mt_render_row(int i) {
+        vector<color> row;
         for (int j = 0; j < image_width; j++) {
             color pixel_color(0, 0, 0);
             for (int samp = 0; samp < samples_per_pixel; ++samp) {
@@ -82,8 +87,9 @@ class camera {
                 pixel_color += ray_color(r, max_depth, *ray_world);
             }
             pixel_color *= pixel_sample_scale;
-            mt_tex[i][j] = pixel_color;
+            row.push_back(pixel_color);
         }
+        mt_tex[i] = row;
     }
     
     void initialize() {

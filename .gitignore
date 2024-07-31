@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+main
+image.ppm
+image (Copy 2).ppm
+camera
