@@ -75,6 +75,10 @@ inline vec3 operator*(const vec3& u, const vec3& v) {
     return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 
+inline vec3 operator/(const vec3& u, const vec3& v) {
+    return vec3(u[0]/v[0], u[1]/v[1], u[2]/v[2]);
+}
+
 inline vec3 operator*(double t, const vec3& v) {
     return vec3(t*v.e[0], t*v.e[1], t*v.e[2]);
 }
@@ -99,6 +103,16 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(const vec3& v) {
     return v/v.length();
+}
+
+#include <cmath>
+using std::min, std::max;
+inline vec3 min(const vec3& u, const vec3& v)  {
+    return vec3(min(u[0], v[0]), min(u[1], v[1]), min(u[2], v[2]));
+}
+
+inline vec3 max(const vec3& u, const vec3& v)  {
+    return vec3(max(u[0], v[0]), max(u[1], v[1]), max(u[2], v[2]));
 }
 
 inline vec3 random_in_unit_sphere() {
