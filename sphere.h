@@ -2,18 +2,18 @@
 #define SPHERE_H
 
 #include "hittable.h"
-#include "rtweekend.h"
+#include "utilities.h"
  
-class sphere : public hittable {
+class Sphere : public Hittable {
     public:
-        sphere(const point3& center, double radius, shared_ptr<material> mat) : center(center), radius(fmax(0, radius)), mat(mat) {};
+        Sphere(const point3& center, double radius, shared_ptr<Material> mat) : m_center(center), m_radius(fmax(0, radius)), m_mat(mat) {};
 
-        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+        bool hit(const Ray& r, const Interval& ray_t, Hit_Record& rec) const override {
 
-            vec3 oc = center - r.origin();
+            vec3 oc = m_center - r.origin();
             double a = r.direction().length_squared();
             double h = dot(r.direction(), oc);
-            double c = oc.length_squared() - radius * radius;
+            double c = oc.length_squared() - m_radius * m_radius;
 
             double det = h*h - a * c;
             if (det < 0.0)
@@ -33,17 +33,17 @@ class sphere : public hittable {
 
             rec.t = root;
             rec.p = r.at(rec.t);
-            vec3 out_norm = (rec.p - center)/radius;
+            vec3 out_norm = (rec.p - m_center)/m_radius;
             rec.set_face_normal(r, out_norm);
-            rec.mat = mat;
+            rec.mat = m_mat;
 
             return true;
         }
 
     private:
-        point3 center;
-        double radius;
-        shared_ptr<material> mat;
+        point3 m_center;
+        double m_radius;
+        shared_ptr<Material> m_mat;
 };
 
 #endif

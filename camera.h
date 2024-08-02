@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "rtweekend.h"
+#include "utilities.h"
 
 #include "hittable.h"
 #include "material.h"
@@ -11,7 +11,7 @@
 #include <chrono>
 using namespace std::chrono;
 
-class camera {
+class Camera {
   public:
     double aspect_ratio = 16.0/ 9.0;
     int image_width = 400;
@@ -24,7 +24,7 @@ class camera {
     double defocus_angle = 0;  // Variation angle of rays through each pixel
     double focus_dist = 10;    // Distance from camera lookfrom point to plane of perfect focus
 
-    void render(const hittable& world) {
+    void render(const Hittable& world) {
         initialize();
 
         cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -51,7 +51,7 @@ class camera {
             for (int i = 0; i < image_width; i++) {
                 color pixel_color(0, 0, 0);
                 for (int samp = 0; samp < samples_per_pixel; ++samp) {
-                    ray r = get_ray(i, j);
+                    Ray r = get_ray(i, j);
                     pixel_color += ray_color(r, max_depth, world);
                 }
                 pixel_color *= pixel_sample_scale;
@@ -65,16 +65,17 @@ class camera {
     }
 
   private:
-    int image_height; 
+    int  image_height; 
     vec3 pixel_delta_u;
     vec3 pixel_delta_v;
-    vec3 center;
-    vec3 pixel00_loc;
+    vec3   center;
+    vec3   pixel00_loc;
+    
     double pixel_sample_scale;
     vec3   u, v, w;     
     vec3   defocus_disk_u;       // Defocus disk horizontal radius
     vec3   defocus_disk_v;       // Defocus disk vertical radius
-    const hittable* ray_world;
+    const Hittable* ray_world;
     vector<vector<color>> mt_tex;
     ThreadPool threadPool;
 
@@ -83,7 +84,7 @@ class camera {
         for (int j = 0; j < image_width; j++) {
             color pixel_color(0, 0, 0);
             for (int samp = 0; samp < samples_per_pixel; ++samp) {
-                ray r = get_ray(j, i);
+                Ray r = get_ray(j, i);
                 pixel_color += ray_color(r, max_depth, *ray_world);
             }
             pixel_color *= pixel_sample_scale;
@@ -128,28 +129,28 @@ class camera {
         defocus_disk_v = v * defocus_radius;
     }
 
-    ray get_ray(int i, int j) {
+    Ray get_ray(int i, int j) {
         vec3 offset = sample_square();
         vec3 sameple_pos = pixel00_loc + (i + offset.x()) * pixel_delta_u + (j + offset.y()) * pixel_delta_v;
         auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
         vec3 ray_direction = sameple_pos - ray_origin;
 
-        return ray(ray_origin, ray_direction);
+        return Ray(ray_origin, ray_direction);
     }
 
     vec3 sample_square() {
         return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
-    color ray_color(const ray& r,  int depth, const hittable& world) {
+    color ray_color(const Ray& r,  int depth, const Hittable& world) {
         if (depth <= 0) {
             return vec3(0, 0, 0);
         }
 
-        hit_record record;
-        if (world.hit(r, interval(0.001, infinity), record)){
+        Hit_Record record;
+        if (world.hit(r, Interval(0.001, infinity), record)){
             color att;
-            ray scatter;
+            Ray scatter;
             if (record.mat->scatter(r, record, att, scatter)) {
                 vec3 direction = record.normal + random_unit_vector();
                 return att * ray_color(scatter, depth - 1, world);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rtweekend.h"
+#include "utilities.h"
 
 class vec3 {
   public:

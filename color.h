@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include "rtweekend.h"
+#include "utilities.h"
 
 #include "interval.h"
 #include "vec3.h"
@@ -27,7 +27,7 @@ void write_color(ostream& out, const color& pixel_color) {
     g = linear_to_gamma(g);
     b = linear_to_gamma(b);
 
-    static const interval intensity(0.000, 0.999);
+    static const Interval intensity(0.000, 0.999);
     int rbyte = int(256 * intensity.clamp(r));
     int gbyte = int(256 * intensity.clamp(g));
     int bbyte = int(256 * intensity.clamp(b));

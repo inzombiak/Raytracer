@@ -36,7 +36,7 @@ class ThreadPool {
             }
             threads.clear();
         }
-        void waitForCompletion() {
+        void wait_for_completion() {
             std::unique_lock<std::mutex> lock(main_mutex);
             main_condition.wait(lock);
         }

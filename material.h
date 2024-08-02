@@ -1,79 +1,79 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "rtweekend.h"
+#include "utilities.h"
 
-class hit_record;
+class Hit_record;
 
-class material {
+class Material {
   public:
-    virtual ~material() = default;
+    virtual ~Material() = default;
 
-    virtual bool scatter( const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const {
+    virtual bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
         return false;
     }
 };
 
-class lambertian : public material {
+class Lambertian : public Material {
     public:
-        lambertian(const color& albedo) : albedo(albedo) {}
+        Lambertian(const color& albedo) : m_albedo(albedo) {}
 
-        bool scatter( const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const {
+        bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
             auto scatter_direction = rec.normal + random_unit_vector();
             if (scatter_direction.near_zero())
                 scatter_direction = rec.normal;
-            scattered = ray(rec.p, scatter_direction);
-            attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
+            attenuation = m_albedo;
 
             return true;
         }
 
     private:
-        color albedo;
+        color m_albedo;
 };
 
-class metal : public material {
+class Metal : public Material {
     public:
-        metal(const color& albedo, double fuzz = 0) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}
+        Metal(const color& albedo, double fuzz = 0) : m_albedo(albedo), m_fuzz(fuzz < 1 ? fuzz : 1) {}
 
-        bool scatter( const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const {
+        bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
             auto scatter_direction = reflect(r_in.direction(), rec.normal);
-            vec3 fuzz_vec = random_unit_vector() * fuzz;
+            vec3 fuzz_vec = random_unit_vector() * m_fuzz;
             scatter_direction = unit_vector(scatter_direction) + fuzz_vec;
             if (scatter_direction.near_zero())
                 scatter_direction = rec.normal;
-            scattered = ray(rec.p, scatter_direction);
-            attenuation = albedo;
+            scattered = Ray(rec.p, scatter_direction);
+            attenuation = m_albedo;
 
             return (dot(scattered.direction(), rec.normal) > 0);
         }
 
     private:
-        color albedo;
-        double fuzz;
+        color m_albedo;
+        double m_fuzz;
 };
 
-class dielectric : public material {
+class Dielectric : public Material {
     public:
-        dielectric(double refraction_index) : refraction_index(refraction_index) {}
+        Dielectric(double refraction_index) : m_refractionIndex(refraction_index) {}
 
-        bool scatter( const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const {
+        bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
             attenuation = color(1.0, 1.0, 1.0);
 
-            double ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
+            double ri = rec.front_face ? (1.0/m_refractionIndex) : m_refractionIndex;
 
             vec3 unit_direction = unit_vector(r_in.direction());
             double cosTheta = fmin(dot(-unit_direction, rec.normal), 1.0);
             double sinTheta = sqrt(1 - cosTheta * cosTheta);
             
-            bool can_refract = sinTheta * ri <= 1.0;
+            bool cannot_reflect = sinTheta * ri > 1.0;
             vec3 direction;
-            if (can_refract)
+            if (cannot_reflect || reflectance(cosTheta, ri) > random_double())
                 direction = refract(unit_direction, rec.normal, ri);
             else
                 direction = reflect(unit_direction, rec.normal);
 
-            scattered = ray(rec.p, direction);
+            scattered = Ray(rec.p, direction);
             return true;
         }
 
@@ -85,7 +85,7 @@ class dielectric : public material {
         }
 
     private:
-        double refraction_index;
+        double m_refractionIndex;
 };
 
 #endif

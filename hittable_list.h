@@ -2,33 +2,33 @@
 #define HITTABLE_LIST_H
 
 #include "hittable.h"
-#include "rtweekend.h"
+#include "utilities.h"
 
 #include <vector>
 
 using std::shared_ptr;
 using std::make_shared;
 
-class hittable_list : public hittable {
+class Hittable_List : public Hittable {
     public:
-        std::vector<shared_ptr<hittable>> objects;
+        std::vector<shared_ptr<Hittable>> objects;
 
-        hittable_list() {};
-        hittable_list(shared_ptr<hittable> obj) {
+        Hittable_List() {};
+        Hittable_List(shared_ptr<Hittable> obj) {
             add(obj);
         }
 
-        void add(shared_ptr<hittable> obj) {
+        void add(shared_ptr<Hittable> obj) {
             objects.push_back(obj);
         }
 
-        bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
-            hit_record record;
+        bool hit(const Ray& r, const Interval& ray_t, Hit_Record& rec) const override {
+            Hit_Record record;
             bool hit_anything = false;
             double closest_so_far = ray_t.max;
 
-            for(const shared_ptr<hittable>& obj : objects) {
-                if(obj->hit(r, interval(ray_t.min, closest_so_far), record)) {
+            for(const shared_ptr<Hittable>& obj : objects) {
+                if(obj->hit(r, Interval(ray_t.min, closest_so_far), record)) {
                     hit_anything = true;
                     rec = record;
                     closest_so_far = rec.t;
