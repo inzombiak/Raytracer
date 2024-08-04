@@ -23,7 +23,8 @@ int main() {
                     // diffuse
                     auto albedo = color::random() * color::random();
                     sphere_material = make_shared<Lambertian>(albedo);
-                    world.add(make_shared<Sphere>(center, 0.2, sphere_material));
+                    point3 center1 = center + vec3::up() * random_double(0, 0.5);
+                    world.add(make_shared<Sphere>(center, center1, 0.2, sphere_material));
                 } else if (choose_mat < 0.95) {
                     // metal
                     auto albedo = color::random(0.5, 1);

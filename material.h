@@ -22,7 +22,7 @@ class Lambertian : public Material {
             auto scatter_direction = rec.normal + random_unit_vector();
             if (scatter_direction.near_zero())
                 scatter_direction = rec.normal;
-            scattered = Ray(rec.p, scatter_direction);
+            scattered = Ray(rec.p, scatter_direction, r_in.time());
             attenuation = m_albedo;
 
             return true;
@@ -42,7 +42,7 @@ class Metal : public Material {
             scatter_direction = unit_vector(scatter_direction) + fuzz_vec;
             if (scatter_direction.near_zero())
                 scatter_direction = rec.normal;
-            scattered = Ray(rec.p, scatter_direction);
+            scattered = Ray(rec.p, scatter_direction, r_in.time());
             attenuation = m_albedo;
 
             return (dot(scattered.direction(), rec.normal) > 0);
@@ -73,7 +73,7 @@ class Dielectric : public Material {
             else
                 direction = reflect(unit_direction, rec.normal);
 
-            scattered = Ray(rec.p, direction);
+            scattered = Ray(rec.p, direction, r_in.time());
             return true;
         }
 

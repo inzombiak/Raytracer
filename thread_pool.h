@@ -8,16 +8,26 @@
 #include <functional>
 #include <atomic>
 
+/*
+    mutex - When locked, threads block until they can acquire it, allowing for synch
+    unique_lock - Locks the mutex for the scope
+    condition_variable - 
+        .notify_one() - notifies a single thread 
+        .notify_all() - notifies all waiting threads
+        .wait() - waits on a condition before proceeding. When a notify_one is used, a random thread checks its wait(), 
+                  when notify all is used all of them do
+    atomic - a variable that is free from data races. Basically, guarantees CORRECT informaiton. Slow 
+*/
 class ThreadPool {
     public:
         void start() {
             njobs_pending = 0;
             uint32_t num_threads = std::thread::hardware_concurrency();
             for(uint32_t i = 0; i < num_threads; ++i)
-                threads.push_back(std::thread(&ThreadPool::thread_loop, this));
+                threads.push_back(std::thread(&ThreadPool::threadLoop, this));
 
         }
-        void queue_job(std::function<void(int)> job, int i) {
+        void queueJob(std::function<void(int)> job, int i) {
             {
                 std::unique_lock<std::mutex> lock(queue_mutex);
                 jobs.push( [job, i] () {job(i);} );
@@ -36,7 +46,7 @@ class ThreadPool {
             }
             threads.clear();
         }
-        void wait_for_completion() {
+        void waitForCompletion() {
             std::unique_lock<std::mutex> lock(main_mutex);
             main_condition.wait(lock);
         }
@@ -46,7 +56,7 @@ class ThreadPool {
         }
 
     private:
-        void thread_loop() {
+        void threadLoop() {
             while (true) {
                 std::function<void()>  job;
                 {

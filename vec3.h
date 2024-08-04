@@ -55,6 +55,18 @@ class vec3 {
     static vec3 random(double min, double max) {
         return vec3(random_double(min, max), random_double(min, max),random_double(min, max));
     }
+
+    static inline vec3 up() {
+        return vec3(0, 1, 0);
+    } 
+
+    static inline vec3 forward() {
+        return vec3(0, 0, 1);
+    } 
+
+    static inline vec3 right() {
+        return vec3(1, 0, 0);
+    }
 };
 
 using point3 = vec3;

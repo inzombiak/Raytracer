@@ -35,7 +35,7 @@ class Camera {
         threadPool.start();
         mt_tex = vector<vector<color>>(image_height);
         for (int j = 0; j < image_height; j++) {
-            threadPool.queue_job([this](int i){ this->mt_render_row(i);},j);
+            threadPool.queueJob([this](int i){ this->mt_render_row(i);},j);
         }
         threadPool.waitForCompletion();
         clog << "Done with MT! \n" << flush; 
@@ -134,8 +134,9 @@ class Camera {
         vec3 sameple_pos = pixel00_loc + (i + offset.x()) * pixel_delta_u + (j + offset.y()) * pixel_delta_v;
         auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
         vec3 ray_direction = sameple_pos - ray_origin;
+        double ray_time = random_double();
 
-        return Ray(ray_origin, ray_direction);
+        return Ray(ray_origin, ray_direction, ray_time);
     }
 
     vec3 sample_square() {

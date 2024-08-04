@@ -7,7 +7,7 @@
 #include <memory>
 #include <random>
 
-#define MT_RENDER 0
+#define MT_RENDER 1
 
 using std::make_shared;
 using std::shared_ptr;

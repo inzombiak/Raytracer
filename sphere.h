@@ -6,11 +6,16 @@
  
 class Sphere : public Hittable {
     public:
-        Sphere(const point3& center, double radius, shared_ptr<Material> mat) : m_center(center), m_radius(fmax(0, radius)), m_mat(mat) {};
+        Sphere(const point3& center, double radius, shared_ptr<Material> mat) : m_center0(center), m_radius(fmax(0, radius)), m_mat(mat), m_isMoving(false) {};
+        Sphere(const point3& center0, const point3& center1, double radius, shared_ptr<Material> mat) : 
+        m_center0(center0), m_radius(fmax(0, radius)), m_mat(mat) {
+            m_centerVec = center1 - center0;
+            m_isMoving = m_centerVec.length_squared() > 0;
+        };
 
         bool hit(const Ray& r, const Interval& ray_t, Hit_Record& rec) const override {
-
-            vec3 oc = m_center - r.origin();
+            vec3 center = getSphereCenter(r.time());
+            vec3 oc = center - r.origin();
             double a = r.direction().length_squared();
             double h = dot(r.direction(), oc);
             double c = oc.length_squared() - m_radius * m_radius;
@@ -33,7 +38,7 @@ class Sphere : public Hittable {
 
             rec.t = root;
             rec.p = r.at(rec.t);
-            vec3 out_norm = (rec.p - m_center)/m_radius;
+            vec3 out_norm = (rec.p - center)/m_radius;
             rec.set_face_normal(r, out_norm);
             rec.mat = m_mat;
 
@@ -41,7 +46,17 @@ class Sphere : public Hittable {
         }
 
     private:
-        point3 m_center;
+        point3 getSphereCenter(double time) const {
+            if (!m_isMoving)
+                return m_center0;
+            
+            return m_center0 + m_centerVec * time;
+        }
+
+
+        point3 m_center0;
+        bool m_isMoving;
+        vec3 m_centerVec;
         double m_radius;
         shared_ptr<Material> m_mat;
 };
