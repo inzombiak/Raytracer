@@ -4,7 +4,7 @@
 #include "hittable.h"
 #include "utilities.h"
  
-class Box : public Hittable {
+class Box : public Hittable, public AABB {
     public:
         Box(const point3& center, const vec3& half_extents, shared_ptr<Material> mat) : m_mat(mat) {
             m_boxMin = center - half_extents;
@@ -68,9 +68,11 @@ class Box : public Hittable {
             return true;
         }
 
+        AABB getBoundingBox() const override {
+            return AABB(m_boxMin, m_boxMax);
+        }
+
     private:
-        vec3 m_boxMin;
-        vec3 m_boxMax;
         shared_ptr<Material> m_mat;
 };
 

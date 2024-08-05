@@ -5,6 +5,8 @@
 #include "sphere.h"
 #include "box.h"
 #include "material.h"
+#include "bvh_node.h"
+
 int main() {
     Hittable_List world;
 
@@ -47,13 +49,15 @@ int main() {
     world.add(make_shared<Sphere>(point3(-4, 1, 0), 1.0, material2));
 
     auto material3 = make_shared<Metal>(color(0.7, 0.6, 0.5), 0.0);
-    world.add(make_shared<Sphere>(point3(4, 1, 0), 1.0, material3));
+    world.add(make_shared<Box>(point3(4, 1, 0), vec3(1), material3));
+
+    world = Hittable_List(make_shared<BVH_Node>(world));
 
     Camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
-    cam.image_width       = 800;
-    cam.samples_per_pixel = 100;
+    cam.image_width       = 1000;
+    cam.samples_per_pixel = 150;
     cam.max_depth         = 50;
 
     cam.vfov     = 20;

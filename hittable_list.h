@@ -19,6 +19,7 @@ class Hittable_List : public Hittable {
         }
 
         void add(shared_ptr<Hittable> obj) {
+            m_aabb = AABB(m_aabb, obj->getBoundingBox());
             objects.push_back(obj);
         }
 
@@ -37,6 +38,13 @@ class Hittable_List : public Hittable {
 
             return hit_anything;
         }
+
+        AABB getBoundingBox() const override {
+            return m_aabb;
+        }
+
+    private:
+        AABB m_aabb;
 };
 
 #endif

@@ -66,12 +66,12 @@ class Dielectric : public Material {
             double cosTheta = fmin(dot(-unit_direction, rec.normal), 1.0);
             double sinTheta = sqrt(1 - cosTheta * cosTheta);
             
-            bool cannot_reflect = sinTheta * ri > 1.0;
+            bool cannot_refract = sinTheta * ri > 1.0;
             vec3 direction;
-            if (cannot_reflect || reflectance(cosTheta, ri) > random_double())
-                direction = refract(unit_direction, rec.normal, ri);
-            else
+            if (cannot_refract || reflectance(cosTheta, ri) > random_double())
                 direction = reflect(unit_direction, rec.normal);
+            else
+                direction = refract(unit_direction, rec.normal, ri);
 
             scattered = Ray(rec.p, direction, r_in.time());
             return true;
