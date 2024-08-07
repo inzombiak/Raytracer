@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "utilities.h"
+#include "texture.h"
 
 class Hit_record;
 
@@ -16,20 +17,21 @@ class Material {
 
 class Lambertian : public Material {
     public:
-        Lambertian(const color& albedo) : m_albedo(albedo) {}
+        Lambertian(const color& albedo) : m_texture(make_shared<BasicTexture>(albedo)) {}
+        Lambertian(shared_ptr<Texture> tex): m_texture(tex) {}
 
         bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
             auto scatter_direction = rec.normal + random_unit_vector();
             if (scatter_direction.near_zero())
                 scatter_direction = rec.normal;
             scattered = Ray(rec.p, scatter_direction, r_in.time());
-            attenuation = m_albedo;
+            attenuation = m_texture->value(rec.u, rec.v, rec.p);
 
             return true;
         }
 
     private:
-        color m_albedo;
+        shared_ptr<Texture> m_texture;
 };
 
 class Metal : public Material {

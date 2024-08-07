@@ -45,6 +45,7 @@ class Sphere : public Hittable {
             rec.t = root;
             rec.p = r.at(rec.t);
             vec3 out_norm = (rec.p - center)/m_radius;
+            getSphereUV(out_norm, rec.u, rec.v);
             rec.set_face_normal(r, out_norm);
             rec.mat = m_mat;
 
@@ -61,6 +62,14 @@ class Sphere : public Hittable {
                 return m_center0;
             
             return m_center0 + m_centerVec * time;
+        }
+
+        static void getSphereUV(const point3& p, double& u, double& v) {
+            auto theta = std::acos(-p.y());
+            auto phi = std::atan2(-p.z(), p.x()) + pi;
+
+            u = phi / (2*pi);
+            v = theta / pi;
         }
 
 

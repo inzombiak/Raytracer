@@ -7,10 +7,10 @@
 #include "material.h"
 #include "bvh_node.h"
 
-int main() {
+void bouncingSpheres() {
     Hittable_List world;
 
-    auto ground_material = make_shared<Lambertian>(color(0.5, 0.5, 0.5));
+    auto ground_material = make_shared<Lambertian>(make_shared<CheckerTexture>(1.0, color(0, 0.7, 0.7), color(0, 0, 0)));
     world.add(make_shared<Sphere>(point3(0,-1000,0), 1000, ground_material));
 
     for (int a = -6; a < 6; a++) {
@@ -69,4 +69,60 @@ int main() {
     cam.focus_dist    = 10.0;
 
     cam.render(world);
+}
+
+void checkeredSpheres() {
+    Hittable_List world;
+
+    auto checker = make_shared<CheckerTexture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
+
+    world.add(make_shared<Sphere>(point3(0,-10, 0), 10, make_shared<Lambertian>(checker)));
+    world.add(make_shared<Sphere>(point3(0, 10, 0), 10, make_shared<Lambertian>(checker)));
+
+    Camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(13,2,3);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+}
+
+void earth() {
+    auto earth_texture = make_shared<ImageTexture>("earthmap.jpg");
+    auto earth_surface = make_shared<Lambertian>(earth_texture);
+    auto globe = make_shared<Sphere>(point3(0,0,0), 2, earth_surface);
+
+    Camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(0,0,12);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(Hittable_List(globe));
+}
+
+
+int main() {
+    switch(3) {
+        case 1: bouncingSpheres();  break;
+        case 2: checkeredSpheres(); break;
+        case 3: earth();            break;
+    }
 }
