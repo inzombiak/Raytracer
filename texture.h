@@ -80,5 +80,21 @@ class ImageTexture : public Texture {
 
 };
 
+#include "perlin.h"
+
+class NoiseTexture : public Texture {
+    public:
+        NoiseTexture(double scale) : m_scale(scale) {}
+
+        color value(double u, double v, const point3& p) const override {        
+            return color(.5, .5, .5) * (1 + std::sin(m_scale * p.z() + 10 * m_perlinNoise.turb(p, 7)));
+        }
+
+    private:
+        double m_scale;
+        Perlin m_perlinNoise;
+
+};
+
 
 #endif

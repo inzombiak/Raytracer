@@ -7,14 +7,16 @@ class AABB {
 
 public:
     AABB() {};
-    AABB(const point3& minima, const point3& maxima) : m_boxMin(minima), m_boxMax(maxima) {}
+    AABB(const point3& minima, const point3& maxima) : m_boxMin(minima), m_boxMax(maxima) { padToMin(); }
     AABB(const Interval& x, const Interval& y, const Interval& z) {
         m_boxMin = point3(x.min, y.min, z.min);
         m_boxMax = point3(x.max, y.max, z.max);
+        padToMin();
     };
     AABB(const AABB& a, const AABB& b) {
         m_boxMin = min(a.m_boxMin, b.m_boxMin);
         m_boxMax = max(a.m_boxMax, b.m_boxMax);
+        padToMin();
     }
 
     int longestAxis() const {
@@ -68,8 +70,22 @@ public:
 
     static const AABB empty, universe;
 protected:
-    point3 m_boxMin, m_boxMax;
+    void padToMin() {
+        static const double MIN_SIZE = 0.0001;
 
+        //Sigh
+        point3 center = (m_boxMax + m_boxMin) * 0.5;
+        vec3 bounds = (m_boxMax - m_boxMin);
+        bounds[0] = max(MIN_SIZE, bounds[0]);
+        bounds[1] = max(MIN_SIZE, bounds[1]);
+        bounds[2] = max(MIN_SIZE, bounds[2]);
+        bounds *= 0.5;
+
+        m_boxMax = center + bounds;
+        m_boxMin = center - bounds;
+    }
+
+    point3 m_boxMin, m_boxMax;
 };
 
 const AABB AABB::empty    = AABB(Interval::empty, Interval::empty, Interval::empty);
