@@ -17,6 +17,7 @@ class Camera {
     int image_width = 400;
     int samples_per_pixel = 10;
     int max_depth = 10;
+    color background_color;
     double vfov = 90;
     point3 lookfrom = point3(0,0,0); 
     point3 lookat   = point3(0,0,-1);
@@ -149,19 +150,16 @@ class Camera {
         }
 
         Hit_Record record;
-        if (world.hit(r, Interval(0.001, infinity), record)){
-            color att;
-            Ray scatter;
-            if (record.mat->scatter(r, record, att, scatter)) {
-                vec3 direction = record.normal + random_unit_vector();
-                return att * ray_color(scatter, depth - 1, world);
-            }
-            return color(0, 0, 0);
-        }
-        vec3 unit = unit_vector(r.direction());
+        if (!world.hit(r, Interval(0.001, infinity), record))
+            return background_color;
+        
+        color att;
+        Ray scatter;
+        color emission_color = record.mat->emitted(record.u, record.v, record.p);
+        if (!record.mat->scatter(r, record, att, scatter)) 
+            return emission_color;
 
-        double y = 0.5*(unit.y() + 1.0);
-        return (1-y)*color(1, 1, 1) + y * color(0.5, 0.7, 1);
+        return att * ray_color(scatter, depth - 1, world) + emission_color;
     }
 
 

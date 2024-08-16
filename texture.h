@@ -96,5 +96,21 @@ class NoiseTexture : public Texture {
 
 };
 
+class EmissiveNoiseTexture : public Texture {
+    public:
+        EmissiveNoiseTexture(double scale, double intensity) : m_scale(scale), m_intensity(intensity) {}
+
+        color value(double u, double v, const point3& p) const override {        
+            return m_intensity * color(.5, .5, .5) * (1 + std::sin(m_scale * p.z() + 10 * m_perlinNoise.turb(p, 7)));
+        }
+
+    private:
+        double m_scale;
+        double m_intensity;
+        Perlin m_perlinNoise;
+
+};
+
+
 
 #endif

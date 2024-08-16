@@ -13,6 +13,10 @@ class Material {
     virtual bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
         return false;
     }
+
+    virtual color emitted(double u, double v, const point3& p) const {
+        return color(0, 0, 0);
+    }
 };
 
 class Lambertian : public Material {
@@ -88,6 +92,18 @@ class Dielectric : public Material {
 
     private:
         double m_refractionIndex;
+};
+
+class Emissive : public Material {
+    public:
+        Emissive(shared_ptr<Texture> tex): m_tex(tex) {}
+        Emissive(const color& emittion) : m_tex(make_shared<BasicTexture>(emittion)) {}
+
+        color emitted(double u, double v, const point3& p) const override {
+            return m_tex->value(u, v, p);
+        }
+    private:
+        shared_ptr<Texture> m_tex;
 };
 
 #endif
