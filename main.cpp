@@ -1,6 +1,7 @@
 #include "utilities.h"
 
 #include "camera.h"
+#include "constant_media.h"
 #include "hittable_list.h"
 #include "sphere.h"
 #include "box.h"
@@ -57,7 +58,7 @@ void bouncingSpheres() {
     Camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
-    cam.image_width       = 1000;
+    cam.image_width       = 400;
     cam.samples_per_pixel = 150;
     cam.max_depth         = 50;
     cam.background_color  = color(0.70, 0.80, 1.00);
@@ -216,6 +217,7 @@ void cornell_box() {
     auto red   = make_shared<Lambertian>(color(.65, .05, .05));
     auto white = make_shared<Lambertian>(color(.73, .73, .73));
     auto green = make_shared<Lambertian>(color(.12, .45, .15));
+    auto blue = make_shared<Lambertian>(color(.12, .15, .45));
     auto light = make_shared<Emissive>(color(15, 15, 15));
 
     world.add(make_shared<Quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
@@ -224,6 +226,61 @@ void cornell_box() {
     world.add(make_shared<Quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
     world.add(make_shared<Quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
     world.add(make_shared<Quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+    
+    shared_ptr<Hittable> box1 = make_shared<Box>(point3(82, 165, 82), point3(82, 165, 82), blue);
+    box1 = make_shared<Rotate_Y>(box1, 15);
+    box1 = make_shared<Translate>(box1, vec3(265, 0, 295));
+    world.add(box1);
+
+    shared_ptr<Hittable> box2 = make_shared<Box>(point3(82, 82, 82), point3(82, 82, 82), white);
+    box2 = make_shared<Rotate_Y>(box2, -18);
+    box2 = make_shared<Translate>(box2, vec3(130, 0, 65));
+    world.add(box2);
+
+    Camera cam;
+
+    cam.aspect_ratio      = 1.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 200;
+    cam.max_depth         = 50;
+    cam.background_color  = color(0,0,0);
+
+    cam.vfov     = 40;
+    cam.lookfrom = point3(278, 278, -800);
+    cam.lookat   = point3(278, 278, 0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+}
+
+void cornell_smoke() {
+    Hittable_List world;
+
+    auto red   = make_shared<Lambertian>(color(.65, .05, .05));
+    auto white = make_shared<Lambertian>(color(.73, .73, .73));
+    auto green = make_shared<Lambertian>(color(.12, .45, .15));
+    auto blue  = make_shared<Lambertian>(color(.12, .15, .45));
+    auto light = make_shared<Emissive>(color(15, 15, 15));
+
+    world.add(make_shared<Quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green));
+    world.add(make_shared<Quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red));
+    world.add(make_shared<Quad>(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light));
+    world.add(make_shared<Quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white));
+    world.add(make_shared<Quad>(point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), white));
+    world.add(make_shared<Quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white));
+    
+    shared_ptr<Hittable> box1 = make_shared<Box>(point3(82, 165, 82), point3(82, 165, 82), blue);
+    box1 = make_shared<Rotate_Y>(box1, 15);
+    box1 = make_shared<Translate>(box1, vec3(265, 0, 295));
+
+    shared_ptr<Hittable> box2 = make_shared<Box>(point3(82, 82, 82), point3(82, 82, 82), white);
+    box2 = make_shared<Rotate_Y>(box2, -18);
+    box2 = make_shared<Translate>(box2, vec3(130, 0, 65));
+
+    world.add(make_shared<Constant_Medium>(box1, 0.01, color(0,0,0)));
+    world.add(make_shared<Constant_Medium>(box2, 0.01, color(1,1,1)));
 
     Camera cam;
 
@@ -244,7 +301,7 @@ void cornell_box() {
 }
 
 int main() {
-    switch(6) {
+    switch(8) {
         case 1: bouncingSpheres();  break;
         case 2: checkeredSpheres(); break;
         case 3: earth();            break;
@@ -252,5 +309,6 @@ int main() {
         case 5: quads();            break;
         case 6: simple_light();     break;
         case 7: cornell_box();      break;
+        case 8: cornell_smoke();    break;
     }
 }

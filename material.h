@@ -106,4 +106,19 @@ class Emissive : public Material {
         shared_ptr<Texture> m_tex;
 };
 
+class Isotropic : public Material {
+    public:
+        Isotropic(const color& albedo) : m_tex(make_shared<BasicTexture>(albedo)) {}
+        Isotropic(shared_ptr<Texture> tex) : m_tex(tex) {}
+
+        bool scatter( const Ray& r_in, const Hit_Record& rec, color& attenuation, Ray& scattered) const {
+            scattered = Ray(rec.p, random_unit_vector(), r_in.time());
+            attenuation = m_tex->value(rec.u, rec.v, rec.p);
+            return true;
+        }
+
+    private:
+        shared_ptr<Texture> m_tex;
+};
+
 #endif

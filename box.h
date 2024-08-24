@@ -51,20 +51,28 @@ class Box : public Hittable, public AABB {
             rec.t = root;
             rec.p = r.at(rec.t);
             vec3 out_norm = (rec.p - (m_boxMin + m_boxMax)*0.5);
-            if (abs(out_norm.x()) > abs(out_norm.y()) && abs(out_norm.x()) > abs(out_norm.z())) {
-                out_norm[1] = 0;
-                out_norm[2] = 0;
-            } else if (abs(out_norm.y()) > abs(out_norm.x()) && abs(out_norm.y()) > abs(out_norm.z())) {
-                out_norm[0] = 0;
-                out_norm[2] = 0;
-            } else {
-                out_norm[0] = 0;
-                out_norm[1] = 0;
-            }
+            double dotX = abs(dot(vec3::right(), out_norm));
+            double dotY = abs(dot(vec3::up(), out_norm));
+            double dotZ = abs(dot(vec3::forward(), out_norm));
+            
+            if(root == t1)
+                out_norm = -vec3::right();
+            else if (root == t2)
+                out_norm = vec3::right();
+            else if(root == t3)
+                out_norm = -vec3::up();
+            else if (root == t4)
+                out_norm = vec3::up();
+            else if(root == t5)
+                out_norm = -vec3::forward();
+            else if (root == t6)
+                out_norm = vec3::forward();
+
             out_norm = unit_vector(out_norm);
             rec.set_face_normal(r, out_norm);
             rec.mat = m_mat;
-
+            rec.u = 1;
+            rec.v = 1;
             return true;
         }
 

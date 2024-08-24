@@ -67,7 +67,8 @@ public:
 
         return true;
     }
-
+    
+    point3 m_boxMin, m_boxMax;
     static const AABB empty, universe;
 protected:
     void padToMin() {
@@ -84,11 +85,13 @@ protected:
         m_boxMax = center + bounds;
         m_boxMin = center - bounds;
     }
-
-    point3 m_boxMin, m_boxMax;
 };
 
 const AABB AABB::empty    = AABB(Interval::empty, Interval::empty, Interval::empty);
 const AABB AABB::universe = AABB(Interval::universe, Interval::universe, Interval::universe);
+
+AABB operator+(const AABB& bbox, const vec3& offset) {
+    return AABB(bbox.m_boxMin + offset, bbox.m_boxMax + offset);
+}
 
 #endif
